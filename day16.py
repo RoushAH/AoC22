@@ -1,4 +1,5 @@
-import itertools
+from functools import lru_cache
+
 MAX_TIME = 26
 global valves
 global starter
@@ -78,7 +79,7 @@ def permutate(vals: list[str], current =None ):
         yield tuple(current)
     elif time_cost(current) > MAX_TIME:
         # print(time_cost(current), current)
-        yield tuple(current)
+        yield tuple(current[:-1])
     else:
         for i in range(len(vals)):
             for output in permutate([x for x in vals if x != vals[i]], current + [vals[i]]):
@@ -97,6 +98,28 @@ def calculate_pressure(steps):
         last = valves[step]
     return final_pressure
 
+# Given a list of options, find the best one
+def find_best(list_of_options):
+    max_pressure = 0
+    best_option = None
+    perms = permutate([name for name in list_of_options])
+    for option in perms:
+        pressure = calculate_pressure(list(option))
+        if pressure > max_pressure:
+            max_pressure = pressure
+            best_option = option
+    return max_pressure, best_option
+
+# Given a list of options and a minimum standard, find all that exceed that minimum
+def find_possible(list_of_options, minimum_standard):
+    winners = []
+    perms = permutate([name for name in list_of_options])
+    for option in perms:
+        pressure = calculate_pressure(list(option))
+        if pressure > minimum_standard:
+            winners.append((option, pressure))
+    return winners
+
 # game plan:
 # 1: pull in data, create room dict and valve objects if needed
 # 2: dijkstra for each valve, and store that as the links for the given valve
@@ -112,18 +135,30 @@ if __name__ == '__main__':
         print(valves[name])
     starter = Valve("AA", 0, do_dijkstra(rooms, "AA", valves))
     print(starter)
-    max_pressure = 0
-    me_perms = permutate([name for name in valves])
-    for option in me_perms:
-        me_pressure = calculate_pressure(list(option))
-        # print(option, me_pressure, [name for name in valves if name not in option])
-        ellie_perms = permutate([name for name in valves if name not in option])
-        for ellie_option in ellie_perms:
-            ellie_pressure = calculate_pressure(list(ellie_option))
-
-            if me_pressure + ellie_pressure > max_pressure:
-                max_pressure = me_pressure + ellie_pressure
-                print(max_pressure, option, ellie_option)
-    print(max_pressure)
+    # Find my best 26-minute run
+    max_pressure, best_option = find_best([name for name in valves])
+    print(max_pressure, best_option)
+    print([name for name in valves if name not in best_option])
+    # Finding the best option for the elephant given the best option
+    replacement, elephant_steps = find_best([name for name in valves if name not in best_option])
+    print(f"Replacement value is {replacement}, for {elephant_steps}")
+    # Finding the list of options that exceed the replacement value
+    better_options = find_possible([name for name in valves], minimum_standard=replacement)
+    print(len(better_options))
+    # Find best combo for the better options
+    best_pressure = max_pressure + replacement
+    best_choices = best_option + elephant_steps
+    i = 0
+    for option in better_options:
+        i += 1
+        steps, pressure = option[0], option[1]
+        p_pressure, p_steps = find_best([name for name in valves if name not in steps])
+        if pressure + p_pressure > best_pressure:
+            best_pressure = pressure + p_pressure
+            best_choices = steps + p_steps
+        if i % 100 == 0:
+            print(f"{i} {best_pressure}: {best_choices}")
+    print(best_choices)
+    print(best_pressure)
 
 #2208 too low
