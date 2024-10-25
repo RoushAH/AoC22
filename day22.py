@@ -16,10 +16,6 @@ m_height = 0
 
 filename = "data/day22sample.txt" if TESTING else "data/day22.txt"
 
-def Cube:
-    # make a 3-d array of Cells, each of which has x, y, and z values of passability.
-    # Then have the character move in 3d space, changing vectors as needed
-
 def check_space(string):
     count = 0
     for i in range(0, len(string)):
