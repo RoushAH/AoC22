@@ -18,8 +18,37 @@ def merge(list_a, list_b, direction=None):
         raise ValueError("Lists must have the same length")
     if direction is None:
         raise ValueError("direction must be specified")
-    elif direction not in ['+', '-']:
-        raise ValueError("direction must be one of '+', '-'")
+    elif direction not in ['+', '-', '*', '/']:
+        raise ValueError("direction must be one of '+', '-', '*', '/'")
     return [
             eval(str(list_a[i]) + direction + str(list_b[i])) for i in range(len(list_a))
         ]
+
+def rectangularise(items, filler):
+    """ Pass a list of strings and a filler char. Fills each row, at the end, so they're all same length"""
+    lens = [len(x) for x in items]
+    max_len = max(lens)
+    for row in range(len(items)):
+        if lens[row] < max_len:
+            items[row] = items[row] + filler * (max_len - lens[row])
+    lens = [len(x) for x in items]
+
+def rotate(values, direction=None): # rotates a square array
+    """ Rotates a square array. Direction is >0 for clockwise, <0 for counter-clockwise"""
+    if len(values) != len(values[0]):
+        raise ValueError("Array must be square")
+    if direction is None:
+        raise ValueError("direction must be specified")
+    new_vals = []
+    size = len(values)
+    if direction > 0:
+        for i in range(size):
+            new_vals.append([
+                values[j][i]
+            for j in range(size-1,-1,-1)])
+    elif direction < 0:
+        for j in range(size-1, -1, -1):
+            new_vals.append([
+                 values[i][j]
+            for i in range(size)])
+    return new_vals

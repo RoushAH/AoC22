@@ -139,7 +139,7 @@ def handle(b:Blueprint):
 
 
 if __name__ == '__main__':
-    filename = "day19.txt"
+    filename = "data/day19.txt"
     with open(filename, 'r') as f:
         data = f.readlines()
     blueprints = [Blueprint(datum) for datum in data]

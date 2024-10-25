@@ -88,9 +88,9 @@ class rope_n:
 if __name__ == "__main__":
     test = input("Run test case? Y/N")
     if test.upper() == "Y":
-        file = "day9sample.txt"
+        file = "data/day9sample.txt"
     else:
-        file = "day9.txt"
+        file = "data/day9.txt"
     with open(file) as f:
         data = f.readlines()
     # data is noisy, strip out trailing \ns and then break into direction/distance pairs

@@ -129,7 +129,7 @@ def find_possible(list_of_options, minimum_standard):
 if __name__ == '__main__':
     global valves
     global starter
-    rooms, valves = parse_input('day16.txt')
+    rooms, valves = parse_input('data/day16.txt')
     for name in valves:
         valves[name].links = do_dijkstra(rooms, name, valves)
         print(valves[name])
