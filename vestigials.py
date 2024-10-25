@@ -1,3 +1,6 @@
+from collections import deque
+from day22 import facing_scores, OPEN, BLANK, WALL
+from listfuncs import rotate
 
 class Face:
     def __init__(self, size):
@@ -45,11 +48,23 @@ class Cube:
         self.sides[current.neighbours[(direction_int+1)%4]].rotate(-1)
         self.facing = current.neighbours[direction_int]
 
+    def __str__(self):
+        output = ""
+        for i in range(len(self.sides)):
+            output += f"\n\nSide {i+1}\n"
+            output += self.sides[i+1].__str__()
+        output += f"\n\nFacing side {self.facing}\n"
+        return output
+
 if __name__ == '__main__':
     world = Cube(2)
     for i in range(1,7):
         world.sides[i].values=[[True, False],[False,True]]
     print(world.facing)
-    for i in range(4):
-        world.rotate("N")
+    # for i in range(4):
+    #     world.rotate("N")
+    #     print(world.facing)
+    for i in range(8):
+        world.rotate("E")
         print(world.facing)
+    print(world)
