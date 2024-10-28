@@ -61,10 +61,10 @@ if __name__ == '__main__':
     for i in range(1,7):
         world.sides[i].values=[[True, False],[False,True]]
     print(world.facing)
-    # for i in range(4):
-    #     world.rotate("N")
-    #     print(world.facing)
-    for i in range(8):
+    for i in range(4):
+        world.rotate("N")
+        print(world.facing)
+    for i in range(4):
         world.rotate("E")
         print(world.facing)
-    print(world)
+    # print(world)
