@@ -8,7 +8,7 @@ TESTING = False
 DIRECTION_VALUES = {"N": (0, -1), "S": (0, 1), "E": (1, 0), "W": (-1, 0)}
 DIR_DEQUE = deque(["N","S","W","E"])
 DIRECTION_LOCATIONS = {"S":(0, 1, 2), "N":(5, 6, 7), "E":(0, 3, 5), "W":(2, 4, 7)}
-ELVES = []  # List of current elf locations
+ELVES = set([])  # List of current elf locations
 PROPOSAL_COUNT = {}  # Dict of proposed_location, num_proposals pairs
 PROPOSAL = {}
 
@@ -36,7 +36,6 @@ def register_proposal(proposed_location):
         PROPOSAL_COUNT[proposed_location] = 1
         return False
 
-@lru_cache(maxsize=128)
 def propose_location(location):
     # Given a location of an elf, choose a proposed new location
     # Iterate to find all possible neighbours
@@ -56,8 +55,9 @@ def propose_location(location):
 
 
 def find_result():
-    min_x, min_y = ELVES[0]
-    max_x, max_y = ELVES[0]
+    print(ELVES)
+    min_x, min_y = list(ELVES)[0]
+    max_x, max_y = list(ELVES)[0]
     for elf in ELVES:
         min_x = min(min_x, elf[0])
         min_y = min(min_y, elf[1])
@@ -85,31 +85,34 @@ if __name__ == "__main__":
         row = data[j]
         for i in range(len(row)):
             if row[i] == ELF:
-                ELVES.append((i,j))
+                ELVES.add((i,j))
     print(ELVES)
+    ELVES = set(ELVES)
     moved = True
     round = 0
+    new_elves = set([])
     while moved:
         moved = False
         round += 1
-        print(f"Round {round}\nLooking to go {DIR_DEQUE[0]}")
+        if round % 10 == 0:
+            print(f"Round {round}\nLooking to go {DIR_DEQUE[0]}")
         # Run a round: first come up with a proposal
         for elf in ELVES:
             register_proposal(propose_location(elf))
         # print(PROPOSAL_COUNT)
         # Create a new list of elves, then check to see whose proposal is valid
-        new_elves = []
         for elf in ELVES:
             proposal = propose_location(elf)
             if PROPOSAL_COUNT[proposal] == 1:
-                new_elves.append(proposal)
+                new_elves.add(proposal)
             else:
-                new_elves.append(elf)
+                new_elves.add(elf)
         # Compare elves to new_elves
         moved = was_change(new_elves)
-        ELVES = new_elves
+        ELVES = new_elves.copy()
         PROPOSAL_COUNT = {}
         DIR_DEQUE.rotate(-1)
+        new_elves.clear()
         # display_elves()
         # print(PROPOSAL_COUNT)
         # input("Press Enter to continue...")
