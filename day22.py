@@ -176,9 +176,6 @@ def process_map(map):
             value = map[j][i]
             if name in FACES:
                 FACES[name].values[j%size][i%size] = value == OPEN
-    # for face in face_names:
-    #     print(face)
-    #     print(FACES[face])
     # Time to join the faces??
     # Do this first automatically by detecting if number neighbours exist
     for y in range(size):
@@ -186,27 +183,40 @@ def process_map(map):
             # check to see if x, y exists
             if f"{y}{x}" in FACES:
                 if f"{y}{(x+1)%size}" in FACES:
-                    # There is a east neighbour
-                    FACES[f"{y}{x}"].neighbours[0] = (f"{y}{(x+1)%size}", 2)
-                    FACES[f"{y}{(x+1)%size}"].neighbours[2] = (f"{y}{x}", 0)
-                    print(f"{y}{x} has a neighbour to the east")
+                    # There is an east neighbour
+                    this_neighbour = f"{(y)%size}{(x+1)%size}"
+                    FACES[f"{y}{x}"].neighbours[0] = (this_neighbour, 2)
+                    FACES[this_neighbour].neighbours[2] = (f"{y}{x}", 0)
+                    print(f"{y}{x} has a neighbour to the east {this_neighbour} {directions[2]}")
                 if f"{(y+1)%size}{x}" in FACES:
                     # There is a south neighbour
                     FACES[f"{y}{x}"].neighbours[1] = (f"{(y+1)%size}{x}", 3)
                     FACES[f"{(y+1)%size}{x}"].neighbours[3] = (f"{y}{x}", 1)
-                    print(f"{y}{x} has a neighbour to the south")
+                    print(f"{y}{x} has a neighbour to the south {(y+1)%size}{x} {directions[3]}")
     for orig_face in FACES:
-        for direction, neighbour in enumerate(FACES[orig_face].neighbours):
-            if neighbour is None:
-                face = "xx"
-                side = 5
-                while face not in FACES:
-                    face = input(f"Which face is {directions[direction]} of {orig_face}")
-                while side not in range(4):
-                    side = int(input(f"Which side of {face} joins the {directions[direction]} of {orig_face}"))
-                FACES[orig_face].neighbours[direction] = (face, side)
-                FACES[face].neighbours[side] = (orig_face, direction)
-    # Check cube to make sure that each face has the correct set of neighbours
+        for direction in range(4):
+            neighbour = FACES[orig_face].neighbours[direction]
+            if neighbour is not None: # we can build off the neighbour
+                # the east neighbour of my north neighbour is my east neighbour, one twist less. Etc.
+                # Need to make sure that this is currently an unknown!
+                tgt = FACES[neighbour[0]] # Harvest the neighbour's name
+                new_neighbour = tgt.neighbours[direction-1] # Find that neighbour's east neighbour
+                if new_neighbour is not None:
+                    print(f"({orig_face}, {direction}), {neighbour}, {new_neighbour}")
+                    new_neighbour_edge_num = (new_neighbour[1]+1)%4
+                    print(f"This means that the {directions[direction-1]} neighbour of {orig_face} is {(new_neighbour[0], new_neighbour_edge_num)}")
+                    FACES[orig_face].neighbours[(direction+1)%4] = (new_neighbour[0], new_neighbour_edge_num)
+                    FACES[new_neighbour[0]].neighbours[new_neighbour_edge_num] = (orig_face, (direction+1)%4)
+        input()
+    i = 1
+    for orig_face in FACES:
+        print(f"Face {orig_face}")
+        for direction in range(4):
+            neighbour = FACES[orig_face].neighbours[direction]
+            if neighbour is not None: # we can build off the neighbour
+                print(f"{i}: Face {orig_face}{directions[direction]}{neighbour}")
+                i+= 1
+
 
 
 if __name__ == "__main__":
