@@ -187,27 +187,26 @@ def process_map(map):
                     this_neighbour = f"{(y)%size}{(x+1)%size}"
                     FACES[f"{y}{x}"].neighbours[0] = (this_neighbour, 2)
                     FACES[this_neighbour].neighbours[2] = (f"{y}{x}", 0)
-                    print(f"{y}{x} has a neighbour to the east {this_neighbour} {directions[2]}")
                 if f"{(y+1)%size}{x}" in FACES:
                     # There is a south neighbour
                     FACES[f"{y}{x}"].neighbours[1] = (f"{(y+1)%size}{x}", 3)
                     FACES[f"{(y+1)%size}{x}"].neighbours[3] = (f"{y}{x}", 1)
-                    print(f"{y}{x} has a neighbour to the south {(y+1)%size}{x} {directions[3]}")
-    for orig_face in FACES:
-        for direction in range(4):
-            neighbour = FACES[orig_face].neighbours[direction]
-            if neighbour is not None: # we can build off the neighbour
-                # the east neighbour of my north neighbour is my east neighbour, one twist less. Etc.
-                # Need to make sure that this is currently an unknown!
-                tgt = FACES[neighbour[0]] # Harvest the neighbour's name
-                new_neighbour = tgt.neighbours[direction-1] # Find that neighbour's east neighbour
-                if new_neighbour is not None:
-                    print(f"({orig_face}, {direction}), {neighbour}, {new_neighbour}")
-                    new_neighbour_edge_num = (new_neighbour[1]+1)%4
-                    print(f"This means that the {directions[direction-1]} neighbour of {orig_face} is {(new_neighbour[0], new_neighbour_edge_num)}")
-                    FACES[orig_face].neighbours[(direction+1)%4] = (new_neighbour[0], new_neighbour_edge_num)
-                    FACES[new_neighbour[0]].neighbours[new_neighbour_edge_num] = (orig_face, (direction+1)%4)
-        input()
+    for k in range(2):
+        for orig_face in FACES:
+            for direction in [0,1,2,3]: # range(4):
+                neighbour = FACES[orig_face].neighbours[direction]
+                if neighbour is not None: # we can build off the neighbour
+                    # the east neighbour of my north neighbour is my east neighbour, one twist less. Etc.
+                    # Need to make sure that this is currently an unknown!
+                    tgt = FACES[neighbour[0]] # Harvest the neighbour's name
+                    tgt_dir = neighbour[1]
+                    new_neighbour = tgt.neighbours[(direction-1)%4] # Find that neighbour's east neighbour
+                    if new_neighbour is not None and FACES[orig_face].neighbours[direction-1] is None:
+                        print(f"({orig_face}, {direction}), {neighbour}, {new_neighbour}")
+                        new_neighbour_edge_num = (new_neighbour[1]+1)%4
+                        print(f"This means that the {directions[direction-1]} neighbour of {orig_face} is {(new_neighbour[0], new_neighbour_edge_num)}")
+                        FACES[orig_face].neighbours[(direction-1)%4] = (new_neighbour[0], new_neighbour_edge_num)
+                        FACES[new_neighbour[0]].neighbours[new_neighbour_edge_num] = (orig_face, (direction+1)%4)
     i = 1
     for orig_face in FACES:
         print(f"Face {orig_face}")
