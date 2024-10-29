@@ -2,32 +2,6 @@ from collections import deque
 from day22 import facing_scores, OPEN, BLANK, WALL
 from listfuncs import rotate
 
-class Face:
-    def __init__(self, size):
-        self.size = size
-        self.values = [[False for i in range(size)] for j in range(size)]
-        # sides in order east, south, west, north
-        self.neighbours = deque([0,0,0,0])
-
-    def rotate(self, direction):
-        if direction < 0:
-            direction = -1
-        elif direction > 0:
-            direction = 1
-        self.values = rotate(self.values, direction)
-        self.neighbours.rotate(direction)
-
-    def __str__(self):
-        output = ""
-        for i in range(len(self.values)):
-            for j in range(len(self.values[i])):
-                if self.values[i][j]:
-                    output += OPEN
-                else:
-                    output += WALL
-            output += "\n"
-        return output
-
 class Cube:
     def __init__(self, size):
         self.size = size

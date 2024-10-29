@@ -52,3 +52,8 @@ def rotate(values, direction=None): # rotates a square array
                  values[i][j]
             for i in range(size)])
     return new_vals
+
+def show_2d(values):
+    output = [" ".join(values[i]) for i in range(len(values))]
+    output = "\n".join(output)
+    print(output)

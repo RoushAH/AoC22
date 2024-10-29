@@ -1,11 +1,11 @@
 from collections import deque
-from listfuncs import merge, compare, rectangularise, rotate
+from listfuncs import merge, compare, rectangularise, rotate, show_2d
 
 TESTING = True
 R = "R"
 L = "L"
 facing_scores = {"E": 0, "S": 1, "W": 2, "N": 3}
-directions = ("E","S","W","N")
+directions = ("E", "S", "W", "N")
 turns = {R: -1, L: 1}
 OPEN = "."
 WALL = "#"
@@ -13,8 +13,47 @@ BLANK = " "
 map = []
 m_width = 0
 m_height = 0
+FACES = {}
 
 filename = "data/day22sample.txt" if TESTING else "data/day22.txt"
+
+
+class Face:
+    def __init__(self, size):
+        self.size = size
+        self.values = [[False for i in range(size)] for j in range(size)]
+        self.orientation = deque(directions)
+        # sides in order east, south, west, north,
+        # stored as a tuple of (face_num, bordering side)
+        self.neighbours = [None, None, None, None]
+
+    def rotate(self, direction):
+        if direction < 0:
+            direction = -1
+        elif direction > 0:
+            direction = 1
+        self.values = rotate(self.values, direction)
+        self.orientation.rotate(direction)
+
+    def orient(self):
+        turns = 0
+        while self.orientation[0] != "E":
+            self.rotate(-1)
+            turns += 1
+        return turns
+
+    def __str__(self):
+        output = ""
+        for i in range(len(self.values)):
+            for j in range(len(self.values[i])):
+                if self.values[i][j]:
+                    output += OPEN
+                else:
+                    output += WALL
+            output += "\n"
+        output += " ".join(self.neighbours)
+        return output
+
 
 def check_space(string):
     count = 0
@@ -59,6 +98,7 @@ def peek(x, y, direction):
     # print(active_val, active_string)
     return next_char, x, y
 
+
 def new_peek(x, y, direction):
     """ Passed, x, y, and direction of character. Returns the next space that character will see """
     if direction in ["E", "W"]:
@@ -81,6 +121,7 @@ def new_peek(x, y, direction):
         # I need to reckon the coords in face-centered coords (0-3 for the test-case). If I have to go fewer than 1 face up or down I swap x / y.
         # If I move to the opposite face, I invert the non-active, and maintain the active -- if I'm moving in X I invert y, etc
         pass
+
 
 class Character:
     def __init__(self, x, y):
@@ -110,6 +151,64 @@ class Character:
         pass
 
 
+def process_map(map):
+    # Break the map into numbered faces of non-blank values
+    # Then ask the user to group them?
+    # Detect the size
+    size = len(map[0])
+    for row in range(len(map)):
+        data, offset = harvest_string(row, "E")
+        size = min(len(data), size)
+    global FACES
+    face_map = map.copy()
+    # replace with TRUE or FALSE
+    face_map = [[f"{j // size}{i // size}" if map[j][i]!= BLANK else "  " for i in range(m_width)] for j in range(m_height)]
+    # Start by breaking the map into squares of size
+    face_names = set([item for sublist in face_map for item in sublist])
+    face_names.remove(BLANK+BLANK)
+    # Find the various face names, and create Face objects for them
+    show_2d(face_map)
+    for name in face_names:
+        FACES[name] = Face(size)
+    for i in range(m_width):
+        for j in range(m_height):
+            name = face_map[j][i]
+            value = map[j][i]
+            if name in FACES:
+                FACES[name].values[j%size][i%size] = value == OPEN
+    # for face in face_names:
+    #     print(face)
+    #     print(FACES[face])
+    # Time to join the faces??
+    # Do this first automatically by detecting if number neighbours exist
+    for y in range(size):
+        for x in range(size):
+            # check to see if x, y exists
+            if f"{y}{x}" in FACES:
+                if f"{y}{(x+1)%size}" in FACES:
+                    # There is a east neighbour
+                    FACES[f"{y}{x}"].neighbours[0] = (f"{y}{(x+1)%size}", 2)
+                    FACES[f"{y}{(x+1)%size}"].neighbours[2] = (f"{y}{x}", 0)
+                    print(f"{y}{x} has a neighbour to the east")
+                if f"{(y+1)%size}{x}" in FACES:
+                    # There is a south neighbour
+                    FACES[f"{y}{x}"].neighbours[1] = (f"{(y+1)%size}{x}", 3)
+                    FACES[f"{(y+1)%size}{x}"].neighbours[3] = (f"{y}{x}", 1)
+                    print(f"{y}{x} has a neighbour to the south")
+    for orig_face in FACES:
+        for direction, neighbour in enumerate(FACES[orig_face].neighbours):
+            if neighbour is None:
+                face = "xx"
+                side = 5
+                while face not in FACES:
+                    face = input(f"Which face is {directions[direction]} of {orig_face}")
+                while side not in range(4):
+                    side = int(input(f"Which side of {face} joins the {directions[direction]} of {orig_face}"))
+                FACES[orig_face].neighbours[direction] = (face, side)
+                FACES[face].neighbours[side] = (orig_face, direction)
+    # Check cube to make sure that each face has the correct set of neighbours
+
+
 if __name__ == "__main__":
     with open(filename, "r") as f:
         data = f.read()
@@ -129,6 +228,7 @@ if __name__ == "__main__":
     m_height = len(map)
     rectangularise(map, BLANK)
     m_width = len(map[0])
+    process_map(map)
     # Do the movement
     for step in steps:
         if step in turns:
@@ -137,5 +237,3 @@ if __name__ == "__main__":
             you.move(step)
     print(you.x, you.y, you.direction)
     print(f"Score is {1000 * (you.y + 1) + 4 * (you.x + 1) + facing_scores[you.direction]}")
-
-
