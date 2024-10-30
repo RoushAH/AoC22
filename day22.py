@@ -191,29 +191,33 @@ def process_map(map):
                     # There is a south neighbour
                     FACES[f"{y}{x}"].neighbours[1] = (f"{(y+1)%size}{x}", 3)
                     FACES[f"{(y+1)%size}{x}"].neighbours[3] = (f"{y}{x}", 1)
-    for k in range(2):
+    for k in range(4):
+        print(f"Matching Round {k}")
         for orig_face in FACES:
-            for direction in [0,1,2,3]: # range(4):
-                neighbour = FACES[orig_face].neighbours[direction]
+            for orig_direction in [0, 1, 2, 3]: # range(4):
+                neighbour = FACES[orig_face].neighbours[orig_direction]
                 if neighbour is not None: # we can build off the neighbour
                     # the east neighbour of my north neighbour is my east neighbour, one twist less. Etc.
                     # Need to make sure that this is currently an unknown!
-                    tgt = FACES[neighbour[0]] # Harvest the neighbour's name
-                    tgt_dir = neighbour[1]
-                    new_neighbour = tgt.neighbours[(direction-1)%4] # Find that neighbour's east neighbour
-                    if new_neighbour is not None and FACES[orig_face].neighbours[direction-1] is None:
-                        print(f"({orig_face}, {direction}), {neighbour}, {new_neighbour}")
+                    known_neighbour = FACES[neighbour[0]] # Harvest the neighbour's name
+                    known_matching_edge = neighbour[1]
+                    new_neighbour = known_neighbour.neighbours[(orig_direction - 1) % 4] # Find that neighbour's east neighbour
+                    if new_neighbour is not None and FACES[orig_face].neighbours[orig_direction - 1] is None and abs(orig_direction - known_matching_edge) == 2:
+                        # This is the case where a west edge joins an east, or a north edge joins a south.
+                        print(f"Off by 1 ({orig_face}, {orig_direction}), {neighbour}, {new_neighbour}")
                         new_neighbour_edge_num = (new_neighbour[1]+1)%4
-                        print(f"This means that the {directions[direction-1]} neighbour of {orig_face} is {(new_neighbour[0], new_neighbour_edge_num)}")
-                        FACES[orig_face].neighbours[(direction-1)%4] = (new_neighbour[0], new_neighbour_edge_num)
-                        FACES[new_neighbour[0]].neighbours[new_neighbour_edge_num] = (orig_face, (direction+1)%4)
+                        print(f"This means that the {directions[orig_direction - 1]} neighbour of {orig_face} is {(new_neighbour[0], directions[new_neighbour_edge_num])}")
+                        FACES[orig_face].neighbours[(orig_direction - 1) % 4] = (new_neighbour[0], new_neighbour_edge_num)
+                        FACES[new_neighbour[0]].neighbours[new_neighbour_edge_num] = (orig_face, (orig_direction + 1) % 4)
+                    # We need to sort the opposites-attract case! N-N or E-E, etc
+                    # 10 N is 11's N (dir + 1)
     i = 1
     for orig_face in FACES:
         print(f"Face {orig_face}")
-        for direction in range(4):
-            neighbour = FACES[orig_face].neighbours[direction]
+        for orig_direction in range(4):
+            neighbour = FACES[orig_face].neighbours[orig_direction]
             if neighbour is not None: # we can build off the neighbour
-                print(f"{i}: Face {orig_face}{directions[direction]}{neighbour}")
+                print(f"{i}: Face {orig_face}{directions[orig_direction]}{neighbour}")
                 i+= 1
 
 
