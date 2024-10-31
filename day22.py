@@ -54,7 +54,6 @@ class Face:
                 else:
                     output += WALL
             output += "\n"
-        output += " ".join(self.neighbours)
         return output
 
 
@@ -119,7 +118,7 @@ def new_peek(face, x, y, direction):
     offset = (edge_to - edge_from) % 4
     new_face = FACES[face_to]
     # The four cases based on how much we rotate, starting with a straight map connection -- W->E, etc
-    # print(f"Offset = {offset}")
+    print(f"Offset = {offset}, from {edge_from} to {edge_to}")
     if abs(offset) == 2:
         new_coord = merge(new_coord, (size, size), "%")
         x = new_coord[0]
@@ -193,7 +192,21 @@ class Character:
 
     def move_cube(self, distance):
         # Need a new peek formula
-        pass
+        for step in range(distance):
+            possible, next_face, next_x, next_y, next_direction = new_peek(self.face, self.x, self.y, self.direction)
+            if possible:
+                self.x = next_x
+                self.y = next_y
+                self.face = next_face
+                if next_direction != self.direction:
+                    self.turn_to_face(next_direction)
+            else:
+                break
+            print(me)
+
+    def __str__(self):
+        return f"Character at {self.x}, {self.y} on {self.face} facing {self.direction}"
+
 
 
 def process_map(map):
@@ -237,26 +250,27 @@ def process_map(map):
                     # There is a south neighbour
                     FACES[f"{y}{x}"].neighbours[1] = (f"{(y + 1) % size}{x}", 3)
                     FACES[f"{(y + 1) % size}{x}"].neighbours[3] = (f"{y}{x}", 1)
-    for orig_face in FACES:
-        # - if I go to a neighbour i share side l = > n with
-        # -   go to his neighbour n + 1 = > m
-        # -   my l - 1 = > m + 1
-        for l in range(4):
-            neighbour = FACES[orig_face].neighbours[l]
-            if neighbour is not None:  # we can build off the neighbour
-                # Need to make sure that this is currently an unknown!
-                known_neighbour = FACES[neighbour[0]]  # Harvest the neighbour object from the name
-                n = neighbour[1]
-                for offset in [-1, 1]:  # this is the number of steps EASTWARD to compare NEEDS TO BE in[-1, 1]
-                    new_neighbour = known_neighbour.neighbours[
-                        (n + offset) % 4]  # Find that neighbour's neighbour one twist eastward
-                    if new_neighbour is not None and FACES[orig_face].neighbours[(l - offset) % 4] is None:
-                        m = new_neighbour[1]
-                        # print(f"Off by {offset} ({orig_face}, {l}), {neighbour}, {new_neighbour}")
-                        # print(
-                        #     f"This means that the {directions[(l - offset) % 4]} neighbour of {orig_face} is {(new_neighbour[0], directions[(m + offset) % 4])}")
-                        FACES[orig_face].neighbours[(l - offset) % 4] = (new_neighbour[0], (m + offset) % 4)
-                        FACES[new_neighbour[0]].neighbours[(m + offset) % 4] = (orig_face, (l - offset) % 4)
+    for i in range(2):
+        for orig_face in FACES:
+            # - if I go to a neighbour i share side l = > n with
+            # -   go to his neighbour n + 1 = > m
+            # -   my l - 1 = > m + 1
+            for l in range(4):
+                neighbour = FACES[orig_face].neighbours[l]
+                if neighbour is not None:  # we can build off the neighbour
+                    # Need to make sure that this is currently an unknown!
+                    known_neighbour = FACES[neighbour[0]]  # Harvest the neighbour object from the name
+                    n = neighbour[1]
+                    for offset in [-1, 1]:  # this is the number of steps EASTWARD to compare NEEDS TO BE in[-1, 1]
+                        new_neighbour = known_neighbour.neighbours[
+                            (n + offset) % 4]  # Find that neighbour's neighbour one twist eastward
+                        if new_neighbour is not None and FACES[orig_face].neighbours[(l - offset) % 4] is None:
+                            m = new_neighbour[1]
+                            # print(f"Off by {offset} ({orig_face}, {l}), {neighbour}, {new_neighbour}")
+                            # print(
+                            #     f"This means that the {directions[(l - offset) % 4]} neighbour of {orig_face} is {(new_neighbour[0], directions[(m + offset) % 4])}")
+                            FACES[orig_face].neighbours[(l - offset) % 4] = (new_neighbour[0], (m + offset) % 4)
+                            FACES[new_neighbour[0]].neighbours[(m + offset) % 4] = (orig_face, (l - offset) % 4)
     # i = 1
     # for orig_face in FACES:
     #     print(f"Face {orig_face}")
@@ -298,7 +312,17 @@ if __name__ == "__main__":
     print(you.x, you.y, you.direction)
     print(f"Score is {1000 * (you.y + 1) + 4 * (you.x + 1) + facing_scores[you.direction]}")
 
-    print(start_face)
-    me = Character(0, 0, start_face)
-    print(me.x, me.y, me.direction, me.face)
-    print(new_peek("11", 1, 3, "S"))
+    print("Phase 2")
+    me = Character(0, 0, face=start_face)
+    print(f"To start with {me}")
+    for step in steps:
+        print()
+        if step in turns:
+            print(f"Turning {step}")
+            me.turn(step)
+            print(me)
+        else:
+            print(f"Moving forward {step}")
+            me.move_cube(step)
+    print(f"Finally at {me}")
+    print(FACES["02"])
