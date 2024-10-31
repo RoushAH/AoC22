@@ -3,7 +3,7 @@ from zipfile import sizeEndCentDir
 
 from listfuncs import merge, compare, rectangularise, rotate, show_2d
 
-TESTING = True
+TESTING = False
 R = "R"
 L = "L"
 facing_scores = {"E": 0, "S": 1, "W": 2, "N": 3}
@@ -118,7 +118,7 @@ def new_peek(face, x, y, direction):
     offset = (edge_to - edge_from) % 4
     new_face = FACES[face_to]
     # The four cases based on how much we rotate, starting with a straight map connection -- W->E, etc
-    print(f"Offset = {offset}, from {edge_from} to {edge_to}")
+    print(f"From {edge_from} to {edge_to}")
     if abs(offset) == 2:
         new_coord = merge(new_coord, (size, size), "%")
         x = new_coord[0]
@@ -132,7 +132,7 @@ def new_peek(face, x, y, direction):
         elif direction in ["S", "N"]:
             x = size - 1 - x
         direction = directions[directions.index(direction) - 2]
-    elif offset == 1:  # W -> N, etc
+    elif edge_to+edge_from in [1, 5]: #offset == 1:  # W -> N, etc
         # this is the scariest to me. there's some swapping thing going on...
         x, y = y, x
         if edge_to == 0:
@@ -144,7 +144,7 @@ def new_peek(face, x, y, direction):
         elif edge_to == 3:
             y = 0
         direction = directions[directions.index(direction) - offset]
-    elif offset == 3:
+    elif edge_to+edge_from ==3: #offset == 3:
         # swap and subtract
         if edge_to == 0:
             y = size - 1 - x
@@ -159,6 +159,8 @@ def new_peek(face, x, y, direction):
             x = size - 1 - y
             y = 0
         direction = directions[directions.index(direction) - offset]
+    else:
+        print(f"Panic!!! {face} {edge_from} {edge_to}")
     return new_face.values[y][x], face_to, x, y, direction
 
 
@@ -324,5 +326,7 @@ if __name__ == "__main__":
         else:
             print(f"Moving forward {step}")
             me.move_cube(step)
-    print(f"Finally at {me}")
-    print(FACES["02"])
+    print(f"Finally: {me}")
+    true_y = me.y + int(me.face[0])*FACES[start_face].size
+    true_x = me.x + int(me.face[1])*FACES[start_face].size
+    print(f"Score is {1000 * (true_y + 1) + 4 * (true_x + 1) + facing_scores[me.direction]}")
