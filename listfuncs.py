@@ -8,9 +8,10 @@ def compare(list_a, list_b, comparator=None):
         raise ValueError("Comparator must be one of '>', '<', '>=', '<=', '==', '!='")
     else:
         for i in range(len(list_a)):
-            if not eval( str(list_a[i]) + comparator + str(list_b[i]) ):
+            if not eval(str(list_a[i]) + comparator + str(list_b[i])):
                 return False
         return True
+
 
 # Add/subtract two lists
 def merge(list_a, list_b, direction=None):
@@ -18,11 +19,12 @@ def merge(list_a, list_b, direction=None):
         raise ValueError("Lists must have the same length")
     if direction is None:
         raise ValueError("direction must be specified")
-    elif direction not in ['+', '-', '*', '/']:
-        raise ValueError("direction must be one of '+', '-', '*', '/'")
+    elif direction not in ['+', '-', '*', '/', '%']:
+        raise ValueError("direction must be one of '+', '-', '*', '/', '%'")
     return [
-            eval(str(list_a[i]) + direction + str(list_b[i])) for i in range(len(list_a))
-        ]
+        eval(str(list_a[i]) + direction + str(list_b[i])) for i in range(len(list_a))
+    ]
+
 
 def rectangularise(items, filler):
     """ Pass a list of strings and a filler char. Fills each row, at the end, so they're all same length"""
@@ -33,7 +35,8 @@ def rectangularise(items, filler):
             items[row] = items[row] + filler * (max_len - lens[row])
     lens = [len(x) for x in items]
 
-def rotate(values, direction=None): # rotates a square array
+
+def rotate(values, direction=None):  # rotates a square array
     """ Rotates a square array. Direction is >0 for clockwise, <0 for counter-clockwise"""
     if len(values) != len(values[0]):
         raise ValueError("Array must be square")
@@ -45,15 +48,23 @@ def rotate(values, direction=None): # rotates a square array
         for i in range(size):
             new_vals.append([
                 values[j][i]
-            for j in range(size-1,-1,-1)])
+                for j in range(size - 1, -1, -1)])
     elif direction < 0:
-        for j in range(size-1, -1, -1):
+        for j in range(size - 1, -1, -1):
             new_vals.append([
-                 values[i][j]
-            for i in range(size)])
+                values[i][j]
+                for i in range(size)])
     return new_vals
+
 
 def show_2d(values):
     output = [" ".join(values[i]) for i in range(len(values))]
     output = "\n".join(output)
     print(output)
+
+if __name__ == "__main__":
+    a = [[str(x)+str(y) for x in range(4)] for y in range(4)]
+    show_2d(a)
+    print("-- "*4)
+    b = rotate(a, 1)
+    show_2d(b)
