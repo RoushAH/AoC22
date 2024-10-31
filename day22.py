@@ -1,5 +1,4 @@
 from collections import deque
-from zipfile import sizeEndCentDir
 
 from listfuncs import merge, compare, rectangularise, rotate, show_2d
 
