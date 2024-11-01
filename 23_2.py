@@ -1,7 +1,4 @@
 from functools import reduce
-from itertools import product
-
-from listfuncs import compare
 
 TESTING = False
 filename = "data/23_2_sample.txt" if TESTING else "data/23_2.txt"

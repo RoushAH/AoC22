@@ -62,9 +62,13 @@ def show_2d(values):
     output = "\n".join(output)
     print(output)
 
+def pad_2d(group_of_items, filler):
+    for row in group_of_items:
+        row.insert(0, filler)
+        row.append(filler)
+    filler_2d = [[filler for i in range(len(group_of_items[0]))]]
+    group_of_items = filler_2d + group_of_items + filler_2d
+    return group_of_items
+
 if __name__ == "__main__":
-    a = [[str(x)+str(y) for x in range(4)] for y in range(4)]
-    show_2d(a)
-    print("-- "*4)
-    b = rotate(a, 1)
-    show_2d(b)
+    print(pad_2d([[1, 2, 3, 4, 5], [0, 1, 2, 3, 4]],0))
