@@ -14,7 +14,7 @@ if __name__ == "__main__":
     with open(f"{get_file_name(stage)}", "r") as f:
         data = f.read()
     data = data.split("\n")
-    print(data)
+    cols = []
     # Find galaxies and empty rows
     for y, line in enumerate(data):
         flag = True
@@ -22,7 +22,12 @@ if __name__ == "__main__":
             if cel == "#":
                 galaxies.append((x, y))
                 flag = False
+                cols.append(x)
         if flag:
             empty_rows.append(y)
+    for i in range(len(data[0])):
+        if i not in cols:
+            empty_cols.append(i)
     print(galaxies)
     print(empty_rows)
+    print(empty_cols)
