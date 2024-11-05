@@ -1,4 +1,7 @@
+from multiprocessing import Pool
+
 from utils import get_file_name, get_data
+from math import log2
 Q = "?"
 D = "#"
 G = "."
@@ -60,21 +63,53 @@ def get_group_list(chars_list):
     group_list.append(start_count)
     return list(filter(lambda x: x> 0,group_list))
 
-def check_options(broken_record, group_list):
+def bin_gen(length):
+    start = [True]*length
+    i = 0
+    while i < 2**length:
+        yield start
+        i += 1
+        val = i
+        for pos in range(length):
+            start[pos] = val % 2 == 0
+            val //= 2
+
+def generate_options(broken_record:str):
+    # Count the Qs, then generate each possible option
+    qs = broken_record.count(Q)
+    bin = bin_gen(qs)
+    for option in bin:
+        copy = list(broken_record)
+        # Replace Qs based on the recipe given
+        for pos in option:
+            copy[copy.index(Q)] = D if pos else G
+        yield "".join(copy)
+
+
+def check_options(inp):
+    broken_record, group_list = inp[0], inp[1]
     # Create a generator to give all possible combinations for a given record.
     # See how many work
-    return 0
+    options = generate_options(broken_record)
+    result = 0
+    for option in options:
+        if get_group_list(option) == list(group_list):
+            result += 1
+    print(group_list, result)
+    return result
 
 if __name__ == "__main__":
-    stage = 1
+    stage = 0
     data = get_data(stage=stage, file=__file__)
     records = [l.split() for l in data]
     records = [(l[0], l[1].split(",")) for l in records]
     records = [(l[0], tuple([int(i) for i in l[1]])) for l in records]
     score = 0
-    print(get_group_list("####.#...#..."))
-    for n, record in enumerate(records):
-        record_score = check_options(*record)
-        print(f"{n}: {record} ({len(record[0])}) worth {record_score}")
-        score += record_score
+    with Pool(5) as p:
+        scores = p.map(check_options, records)
+    # for n, record in enumerate(records):
+    #     record_score = check_options(*record)
+    #     print(f"{n}: {record} ({record[0].count(Q)}) worth {record_score}")
+    #     score += record_score
+    score = sum(scores)
     print(f"Part 1: {score}, Valid? {8314 > score}")
