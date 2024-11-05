@@ -95,7 +95,7 @@ def check_options(inp):
     for option in options:
         if get_group_list(option) == list(group_list):
             result += 1
-    print(group_list, result)
+    # print(group_list, result)
     return result
 
 if __name__ == "__main__":
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     records = [(l[0], l[1].split(",")) for l in records]
     records = [(l[0], tuple([int(i) for i in l[1]])) for l in records]
     score = 0
-    with Pool(5) as p:
+    with Pool(8) as p:
         scores = p.map(check_options, records)
     # for n, record in enumerate(records):
     #     record_score = check_options(*record)
