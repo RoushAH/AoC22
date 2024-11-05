@@ -63,21 +63,25 @@ def get_group_list(chars_list):
     group_list.append(start_count)
     return list(filter(lambda x: x> 0,group_list))
 
-def bin_gen(length):
+def bin_gen(length, tgt=None):
     start = [True]*length
     i = 0
     while i < 2**length:
-        yield start
+        if tgt and start.count(True) == tgt:
+            yield start
+        else:
+            yield start
         i += 1
         val = i
         for pos in range(length):
             start[pos] = val % 2 == 0
             val //= 2
 
-def generate_options(broken_record:str):
+def generate_options(broken_record:str, group_list:list[int]):
     # Count the Qs, then generate each possible option
     qs = broken_record.count(Q)
-    bin = bin_gen(qs)
+    ds = broken_record.count(D)
+    bin = bin_gen(qs, sum(group_list)-ds)
     for option in bin:
         copy = list(broken_record)
         # Replace Qs based on the recipe given
@@ -90,7 +94,7 @@ def check_options(inp):
     broken_record, group_list = inp[0], inp[1]
     # Create a generator to give all possible combinations for a given record.
     # See how many work
-    options = generate_options(broken_record)
+    options = generate_options(broken_record, group_list)
     result = 0
     for option in options:
         if get_group_list(option) == list(group_list):
@@ -98,18 +102,35 @@ def check_options(inp):
     # print(group_list, result)
     return result
 
+def unfold(record):
+    broken_record, group_list = record[0], record[1]
+    new_record_string = broken_record+Q+broken_record+Q+broken_record+Q+broken_record+Q+broken_record
+    new_group_list = group_list*5
+    return new_record_string, new_group_list
+
+def triple_check(record):
+    broken_record, group_list = record[0], record[1]
+    basic_score = check_options(record)
+    add_to_front_score = check_options((Q+broken_record,group_list))
+    add_to_end_score = check_options((broken_record+Q, group_list))
+    score = basic_score * add_to_front_score ** 4 + add_to_end_score ** 4 * basic_score
+    print(basic_score, add_to_front_score, add_to_end_score, score)
+    return score
+
 if __name__ == "__main__":
-    stage = 0
+    stage = 1
     data = get_data(stage=stage, file=__file__)
     records = [l.split() for l in data]
     records = [(l[0], l[1].split(",")) for l in records]
     records = [(l[0], tuple([int(i) for i in l[1]])) for l in records]
-    score = 0
-    with Pool(8) as p:
-        scores = p.map(check_options, records)
-    # for n, record in enumerate(records):
-    #     record_score = check_options(*record)
-    #     print(f"{n}: {record} ({record[0].count(Q)}) worth {record_score}")
-    #     score += record_score
-    score = sum(scores)
+    score, score2 = 0, 0
+    # with Pool(8) as p:
+    #     scores = p.map(check_options, records)
+    # score = sum(scores)
+    for n, record in enumerate(records):
+        record_score = check_options(record)
+        print(f"{n}: {record} ({record[0].count(Q)}) worth {record_score}")
+        score += record_score
+        score2 += triple_check(record)
+        print(f"Score 2 = {score2}")
     print(f"Part 1: {score}, Valid? {8314 > score}")
