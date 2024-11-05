@@ -9,18 +9,20 @@ galaxies = []
 empty_rows = []
 empty_cols = []
 
-def find_distance(a, b):
+def find_distance(a, b, expansion=None):
     x = abs(a[0] - b[0])
     y = abs(a[1] - b[1])
+    if expansion is None:
+        expansion = 2
     # Now I need to check to see if we've passed through some empties
     x_range = (min(a[0], b[0]), max(a[0], b[0]))
     y_range = (min(a[1], b[1]), max(a[1], b[1]))
     for e in empty_rows:
         if y_range[0] < e < y_range[1]:
-            y += 1
+            y += expansion-1
     for e in empty_cols:
         if x_range[0] < e < x_range[1]:
-            x += 1
+            x += expansion-1
     return x + y
 
 if __name__ == "__main__":
@@ -48,3 +50,10 @@ if __name__ == "__main__":
         for gal_b in galaxies[num+1:]:
             score += find_distance(gal_a, gal_b)
     print(f"Part 1 {score}")
+    expansion = 1000000
+    score = 0
+    for num, gal_a in enumerate(galaxies):
+        for gal_b in galaxies[num+1:]:
+            score += find_distance(gal_a, gal_b, expansion)
+    print(f"Part 2 {score} {score < 726820896326}")
+
