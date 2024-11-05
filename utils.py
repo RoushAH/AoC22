@@ -6,3 +6,16 @@ def ints_in_range(low, high):
     else:
         high = int(high + 1)
     return high - low
+
+def get_file_name(stage, file):
+    filename = file.split("\\")[-1].split(".")[0]
+    if stage == 0:
+        return f"data/{filename}.txt"
+    else:
+        return f"data/{filename}_sample{stage}.txt"
+
+def get_data(stage, file):
+    filename = get_file_name(stage, file)
+    with open(f"{filename}", "r") as f:
+        data = f.read()
+    return data.split("\n")
