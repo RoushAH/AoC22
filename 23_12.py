@@ -148,7 +148,7 @@ def possibles(record, group_list):
     # Start looping here??
     loops_count = math.ceil(record.count(Q) / q_count)
     for loop in range(loops_count + 1):
-        new_options = []
+        new_options = set()
         for option in options:
             loc = -1
             for i in range(0, q_count):
@@ -159,11 +159,11 @@ def possibles(record, group_list):
             record_slice = option[:loc + 1]
             back_slice = option[loc + 1:]
             opt_gen = generate_options(record_slice)
-            new_options.extend([opt + back_slice for opt in opt_gen if check_start(opt,
+            new_options.update([opt + back_slice for opt in opt_gen if check_start(opt,
                                                                                    group_list)])
         options = new_options
 
-    double_score = len(list(filter(lambda x: get_group_list(x) == list(group_list), options)))
+    double_score = len(set(filter(lambda x: get_group_list(x) == list(group_list), options)))
     return double_score, loops_count
 
 
