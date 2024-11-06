@@ -70,5 +70,10 @@ def pad_2d(group_of_items, filler):
     group_of_items = filler_2d + group_of_items + filler_2d
     return group_of_items
 
+def starts_with(big, little):
+    big = tuple(big[:len(little)])
+    little = tuple(little)
+    return big == little
+
 if __name__ == "__main__":
     print(pad_2d([[1, 2, 3, 4, 5], [0, 1, 2, 3, 4]],0))
