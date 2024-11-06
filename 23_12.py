@@ -169,8 +169,8 @@ def possibles(record, group_list):
 
 def part_2_check(record):
     # Don't think I can discount extras from a Q => G
-    basic_score = check_options(record)
     broken_record, group_list = record[0], record[1]
+    basic_score, blc = possibles(broken_record, group_list)
     # double_record = broken_record + D + broken_record
     double_record = broken_record + Q + broken_record
     double_group_list = group_list * 2
@@ -197,7 +197,7 @@ def part_2_check(record):
 
 
 if __name__ == "__main__":
-    stage = 0
+    stage = 1
     data = get_data(stage=stage, file=__file__)
     records = [l.split() for l in data]
     records = [(l[0], l[1].split(",")) for l in records]
