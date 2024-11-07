@@ -33,12 +33,31 @@ def find_v_mirror(pattern):
 
 def process_map(pattern):
     # Given a pattern, try to find a horizontal match. If none exists, try to find a vertical match.
-    row, col = find_h_mirror(pattern), find_v_mirror(pattern)
+    row = find_h_mirror(pattern)
+    col = find_v_mirror(pattern) if row == 0 else 0
     return row, col
+
+def comp_diff(a:list, b:list):
+    """ Pass two lists, return a list of true if different else false"""
+    if len(a) != len(b):
+        return None
+    return [a[i] != b[i] for i in range(len(a))]
 
 def desmudge_map(pattern):
     # Pass a pattern. Find possible smudges and see if each returns a valid score.
     # Smudges are possible in a row that a) matches another row but for a single value.
+    for i, row_a in enumerate(pattern):
+        for j, row_b in enumerate(pattern[i+1:], i+1):
+            difference = comp_diff(row_a, row_b)
+            if difference.count(True) == 1:
+                temp_pattern = pattern.copy()
+                temp_pattern[j][i] = not temp_pattern[j][i]
+                score = process_map(temp_pattern)
+                print(f"{i},{j}: {comp_diff(row_a, row_b)} == {score}"
+                      f"\n{''.join(['#' if x else '.' for x in row_a])}"
+                      f"\n{''.join(['#' if x else '.' for x in row_b])}")
+                if score != (0,0):
+                    return score
     pass
 
 if __name__ == "__main__":
@@ -58,3 +77,9 @@ if __name__ == "__main__":
 
     ## Part 2 begins here
     patterns = [[[v == "#" for v in q] for q in p] for p in patterns]
+    scores = [desmudge_map(pattern) for pattern in patterns]
+    print(scores)
+    # r_score = sum([x[0] for x in scores])
+    # c_score = sum([x[1] for x in scores])
+    # score = c_score + 100 * r_score
+    # print(f"Part 1 score: {score}")
