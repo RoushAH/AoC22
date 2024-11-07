@@ -14,8 +14,8 @@ def get_file_name(stage, file):
     else:
         return f"data/{filename}_sample{stage}.txt"
 
-def get_data(stage, file):
+def get_data(stage, file, string = None):
     filename = get_file_name(stage, file)
     with open(f"{filename}", "r") as f:
         data = f.read()
-    return data.split("\n")
+    return data.split("\n") if not string else data

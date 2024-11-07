@@ -75,5 +75,16 @@ def starts_with(big, little):
     little = tuple(little)
     return big == little
 
+def harvest_string(value, direction, grid):
+    """ Returns the valid component of the string, ignoring blanks, and the count of blanks removed from the beginning"""
+    if direction.lower() in ["h"]:
+        return grid[value]
+    str_out = ""
+    for i in range(len(grid)):
+        str_out += str(grid[i][value])
+    return str_out
+
 if __name__ == "__main__":
-    print(pad_2d([[1, 2, 3, 4, 5], [0, 1, 2, 3, 4]],0))
+    print(x:=pad_2d([[1, 2, 3, 4, 5], [0, 1, 2, 3, 4]],0))
+    print(harvest_string(2,"h",x))
+    print(harvest_string(0,"v",x))
