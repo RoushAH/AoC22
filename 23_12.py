@@ -1,11 +1,11 @@
 import math
 import time
 from multiprocessing import Pool
-from turtledemo.penrose import start
-
+import tqdm
 from listfuncs import starts_with
 from utils import get_file_name, get_data
 from math import comb
+from functools import lru_cache, cache
 
 Q = "?"
 D = "#"
@@ -133,16 +133,17 @@ def check_start(record_so_far, full_list):
     """ Given a partial record, see if it MAY match the full list by making sure they start the same.
     Will neglect any trailing block of Ds"""
     short_list = get_group_list(record_so_far)
-    if max(short_list+[0]) > max(full_list):
+    if max(short_list + [0]) > max(full_list):
         return False
-    if record_so_far.endswith(D):# and len(short_list) < len(full_list):
+    if record_so_far.endswith(D):  # and len(short_list) < len(full_list):
         short_list.pop()  # This DOES allow the case of ending with 5 when the max is 3...
     return starts_with(full_list, short_list)
+
 
 def possibles(record, group_list):
     """ Given a record with Qs and a group list, count the number of possibles """
     # Deliver 6 Qs at a time??? Check the first 6, bin off any invalid options, then continue??
-    q_count = 4
+    q_count = 6
     options = [record]
 
     # Start looping here??
@@ -162,63 +163,90 @@ def possibles(record, group_list):
             new_options.update([opt + back_slice for opt in opt_gen if check_start(opt,
                                                                                    group_list)])
         options = new_options
-
     double_score = len(set(filter(lambda x: get_group_list(x) == list(group_list), options)))
     return double_score, loops_count
+
+
+def unfold_record(record):
+    broken_record, group_list = record[0], record[1]
+    full_record = broken_record
+    for i in range(4):
+        full_record += Q + broken_record
+    full_group_list = group_list * 5
+    return full_record, full_group_list
+
+
+def is_valid(record):
+    broken_record, group_list = record[0], record[1]
+    return (
+            group_list[0] <= len(broken_record)
+            and
+            G not in broken_record[:group_list[0]]
+            and (
+                    group_list[0] == len(broken_record)
+                    or
+                    broken_record[group_list[0]] != D
+            )
+    )
+
+
+@cache
+def recur_check(record):
+    broken_record, group_list = record[0], record[1]
+    if not group_list:
+        return D not in broken_record
+
+    if not broken_record:
+        return not group_list
+
+    combos = 0
+
+    if broken_record[0] in [G, Q]:
+        # Assume it could be good
+        combos += recur_check((broken_record[1:], group_list))
+
+    if broken_record[0] in [D, Q]:
+        # Neglect the next group
+        if is_valid(record):
+            combos += recur_check((broken_record[group_list[0] + 1:], group_list[1:]))
+
+    return combos
 
 
 def part_2_check(record):
     # Don't think I can discount extras from a Q => G
     broken_record, group_list = record[0], record[1]
     basic_score, blc = possibles(broken_record, group_list)
-    # double_record = broken_record + D + broken_record
     double_record = broken_record + Q + broken_record
     double_group_list = group_list * 2
 
-    # double_score, loops_count = possibles(broken_record + D + broken_record, double_group_list)
-    double_q_score, loops_count = possibles(double_record, double_group_list)
+    double_score, loops_count = possibles(double_record, double_group_list)
 
-    # triple_record = double_record + Q + broken_record
-    # triple_group_list = group_list * 3
-    # triple_score, triple_loops_count = possibles(triple_record, triple_group_list)
-    daisy_score = double_q_score // basic_score
-    print(f"2x{double_q_score}, Basic {basic_score} Daisy {daisy_score}")
-    # Basically, it's 1x basic + between 0 and 4 dasies. Boom, biddy, bye bye
-    # n = 4
-    # p2score = 0
-    # for k in range(n + 1):
-    #     coefficient = comb(n, k)
-    #     k_score = coefficient * basic_score ** (n - k + 1) * daisy_score ** k
-    #     p2score += k_score
-    p2score = daisy_score ** 4 * basic_score
-    print(f"P2: {p2score}, {record[0]}, Daisy score of {daisy_score}\n")
-    # print(f"Or, P2 = {daisy_score ** 4 * basic_score}")
+    chain_score = double_score // basic_score
+    p2score = chain_score ** 3 * double_score  # should be chain score!
     return p2score
 
 
 if __name__ == "__main__":
-    stage = 1
+    stage = 0
     data = get_data(stage=stage, file=__file__)
     records = [l.split() for l in data]
     records = [(l[0], l[1].split(",")) for l in records]
     records = [(l[0], tuple([int(i) for i in l[1]])) for l in records]
     start = time.time()
     score, score2 = 0, 0
-    with Pool(4) as p:
-        # scores = p.map(check_options, records)
-        scores2 = p.map(part_2_check, records)
-    # score = sum(scores)
+    p = Pool(3)
+    print("Part 1")
+    scores = list(tqdm.tqdm(p.map(recur_check, records), total=len(records)))
+    print("Part 2")
+    records = list(p.map(unfold_record, records))
+    scores2 = list(tqdm.tqdm(p.imap_unordered(recur_check, records), total=len(records)))
+    score = sum(scores)
     score2 = sum(scores2)
     end = time.time()
-    # score = 0
-    # for n, record in enumerate(records):
-    #     record_score = check_options(record)
-    #     score += record_score
-    # record_2_score = part_2_check(record)
-    #     score2 += record_2_score
-    #     print(f"{n}: worth {record_score}[1], {record_2_score}[2]")
-    print(f"Part 1: {score}, Valid? {8180 == score}")
-    print(f"Score 2: {score2}, Valid? {92222689589656 < score2 and 358642332799137 != score2} Test? {score2 == 525152}")
+    print(f"Score 1: {score}, Valid? {8180 == score}")
+    print(
+        f"Score 2: {score2}, Valid? {92222689589656 < score2 and score2 not in [358642332799137, 358748438525103]} Test? {score2 == 525152}")
     print(f"Time: {end - start}s")
     # Part 1 -- 19 Qs max
     # Part 2 -- 39 max
