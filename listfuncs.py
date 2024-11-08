@@ -56,9 +56,13 @@ def rotate(values, direction=None):  # rotates a square array
                 for i in range(size)])
     return new_vals
 
+def flip_2d(grid):
+    out = [[grid[i][j] for i in range(len(grid))] for j in range(len(grid[0]))]
+    return out
+
 
 def show_2d(values):
-    output = [" ".join(values[i]) for i in range(len(values))]
+    output = ["".join(values[i]) for i in range(len(values))]
     output = "\n".join(output)
     print(output)
 
@@ -75,9 +79,14 @@ def starts_with(big, little):
     little = tuple(little)
     return big == little
 
+def ends_with(big, little):
+    big = tuple(big[-len(little):])
+    little = tuple(little)
+    return big == little
+
 def harvest_string(value, direction, grid):
     """ Returns the valid component of the string, ignoring blanks, and the count of blanks removed from the beginning"""
-    if direction.lower() in ["h"]:
+    if direction.lower() in ["h", "e", "w"]:
         return grid[value]
     str_out = ""
     for i in range(len(grid)):
@@ -85,6 +94,5 @@ def harvest_string(value, direction, grid):
     return str_out
 
 if __name__ == "__main__":
-    print(x:=pad_2d([[1, 2, 3, 4, 5], [0, 1, 2, 3, 4]],0))
-    print(harvest_string(2,"h",x))
-    print(harvest_string(0,"v",x))
+    print(x:=pad_2d([[1, 2, 3, 4, 5], [5, 1, 2, 3, 4]],0))
+    print(flip_2d(x))
