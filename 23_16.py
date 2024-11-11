@@ -54,18 +54,3 @@ def measure_lava(start):
 
 if __name__ == "__main__":
     stage = 0
-    data = get_data(stage=stage, file=__file__, string=True)
-    data = data.split("\n")
-
-    print(f"Part 1 score: {measure_lava(START)}")
-
-    starting_options = [((0,j),"E") for j in range(len(data))] + [((len(data[0])-1,j), "W") for j in range(len(data))] # down the two sides
-    starting_options += [((i,0),"S") for i in range(len(data[0]))] + [((i,len(data)-1),"N") for i in range(len(data))] # across the two flats
-    results = list(tqdm(map(measure_lava, starting_options), total=len(starting_options)))
-    print(results)
-    print(starting_options[results.index(max(results))])
-    print(f"Part 2 score: {max(results)}")
-    # with Pool(3) as p:
-    #     scores = list(tqdm(p.imap(measure_lava, starting_options)))
-    # print(scores)
-    # print(f"Part 2 score: {sum(scores)}")
