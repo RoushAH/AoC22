@@ -38,6 +38,7 @@ def measure_lava(start):
         current_loc, current_dir = current_locs.pop(0)
         # loop over current stages of the light beam, advancing/bouncing/splitting each one
         visited.add((current_loc, current_dir)) # add the current location to the visited set
+        # print(current_loc, current_dir)
         current_cel = data[current_loc[1]][current_loc[0]]
         for move in moves(current_cel, current_dir):
             new_loc = merge(current_loc, DIRECTION_VALUES[move],"+")
@@ -54,3 +55,11 @@ def measure_lava(start):
 
 if __name__ == "__main__":
     stage = 0
+    data = get_data(stage, __file__, string=True)
+    data = data.split("\n")
+
+    print(f"Part 1 result: {measure_lava(START)}")
+    starts = [((0,j),"E") for j in range(0,len(data))] + [((len(data[0])-1,j),"W") for j in range(0,len(data))]
+    starts += [((i,0),"S") for i in range(0, len(data[0]))] + [((i, len(data)-1),"N") for i in range(0, len(data))]
+    scores = tqdm(map(measure_lava, starts), total=len(starts))
+    print(f"Part 2 result: {max(scores)}")
