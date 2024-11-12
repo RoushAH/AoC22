@@ -5,7 +5,7 @@
 # Rethink
 
 # Possibly start with a max bid, then iterate downward -- "Is there a parth that only costs x? What about x-1?"
-# Or a priority list of paths attempted? And always operate on the shortest one?? OoooOooOoooo with a heuristic func based on avg distance to tgt???
+# Or a priority list of paths attempted? And always operate on the shortest one?? OoooOooOoooo A* with a heuristic func based on distance to tgt???
 
 from listfuncs import show_2d
 from utils import get_data
