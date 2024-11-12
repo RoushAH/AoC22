@@ -94,6 +94,40 @@ def find_path(end):
         print(hist)
     return hist
 
+def find_path(end):
+    print("path")
+    global grid
+    x, y = end
+    hist = [grid[y][x]]
+    prev = grid[y][x].previous
+    while prev != "START":
+        x, y = prev.x, prev.y
+        hist.append(prev)
+        prev = grid[y][x].previous
+        print(hist)
+    return hist
+
+# Go recursive to explore for better  --
+# # Fail case is if current path is already > min bid
+# # Else check L, R, and C (if it's >= 3 Cs in a row)
+# # Recursive call is  ((x,y), path_so_far)
+
+def recur_walk(cel, path_so_far: list[Node]):
+    if cost_path(path_so_far) > max_bid or (path_so_far and cost_path(path_so_far) / len(path_so_far) > max_bid / len(diag_walk)):
+        return max_bid, diag_walk # We've found a dead branch
+    path_so_far.append(cel)
+    if (cel.x, cel.y) == (len(grid) - 1, len(grid[0]) - 1):
+        return cost_path(path_so_far), path_so_far
+    costs, paths = [max_bid],[diag_walk]
+    for neighbour in get_neighbour(cel, path_so_far):
+        cost, path = recur_walk(neighbour, path_so_far.copy())
+        costs.append(cost)
+        paths.append(path)
+    cost = min(costs) if len(costs) else 0
+    path = paths[costs.index(cost)] if costs else []
+    print(len(path_so_far))
+    return cost, path
+
 if __name__ == '__main__':
     world = Cube(2)
     for i in range(1,7):
