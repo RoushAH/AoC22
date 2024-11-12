@@ -2,7 +2,10 @@
 # Dijkstra-man! doesn't work. Because best path to spot n+1 != best path to n plus 1
 # Need to go back to basic bid, then rando-walk
 # Iterate down the major diagonal to find the minimum bid
-from functools import cache
+# Rethink
+
+# Possibly start with a max bid, then iterate downward -- "Is there a parth that only costs x? What about x-1?"
+# Or a priority list of paths attempted? And always operate on the shortest one?? OoooOooOoooo with a heuristic func based on avg distance to tgt???
 
 from listfuncs import show_2d
 from utils import get_data
@@ -10,7 +13,6 @@ grid = []
 S = "START"
 max_bid = 0
 diag_walk = []
-walks = set()
 
 class Node:
     def __init__(self, x, y, value):
@@ -78,7 +80,7 @@ def get_neighbour(node, path_so_far):
 # # Recursive call is  ((x,y), path_so_far)
 
 def recur_walk(cel, path_so_far: list[Node]):
-    if cost_path(path_so_far) > max_bid:
+    if cost_path(path_so_far) > max_bid or (path_so_far and cost_path(path_so_far) / len(path_so_far) > max_bid / len(diag_walk)):
         return max_bid, diag_walk # We've found a dead branch
     path_so_far.append(cel)
     if (cel.x, cel.y) == (len(grid) - 1, len(grid[0]) - 1):
@@ -90,12 +92,7 @@ def recur_walk(cel, path_so_far: list[Node]):
         paths.append(path)
     cost = min(costs) if len(costs) else 0
     path = paths[costs.index(cost)] if costs else []
-    if tuple(path_so_far) not in walks:
-        walks.add(tuple(path_so_far))
-        print(len(walks))
-    else:
-        print(f"Repeat path!! {path_so_far}")
-    # print(len(path_so_far))
+    print(len(path_so_far))
     return cost, path
 
 
