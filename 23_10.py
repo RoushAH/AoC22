@@ -48,7 +48,6 @@ def get_file_name(stage):
         return f"data/{filename}_sample{stage}.txt"
 
 def process_row(row_in_question):
-    active = False
     inside = False
     count = 0
     last_cross = ""

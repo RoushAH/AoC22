@@ -1,6 +1,6 @@
 import math
 import time
-from multiprocessing import Pool
+from manything import Pool
 import tqdm
 from listfuncs import starts_with
 from utils import get_file_name, get_data

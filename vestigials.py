@@ -60,6 +60,54 @@ def get_neighbour(x, y, visited=None):
         yield grid[y+1][x]
 
 
+
+def diagonal_bid():
+    size = len(grid)
+    x, y = 0, 0
+    path = []
+    while x < size:
+        path.append(grid[y][x])
+        if y == x:
+            x += 1
+        else:
+            y += 1
+    return path
+
+def get_neighbour(path_so_far):
+    x, y = path_so_far[-1].x, path_so_far[-1].y
+    if x > 0 and (grid[y][x-1] not in path_so_far) and legal_proceed(path_so_far, (x - 1, y)):
+        yield grid[y][x-1]
+    if x < len(grid[0]) - 1 and (grid[y][x+1] not in path_so_far) and legal_proceed(path_so_far, (x + 1, y)):
+        yield grid[y][x+1]
+    if y > 0 and (grid[y-1][x] not in path_so_far) and legal_proceed(path_so_far, (x, y - 1)):
+        yield grid[y-1][x]
+    if y < len(grid) - 1 and (grid[y+1][x] not in path_so_far) and legal_proceed(path_so_far, (x, y + 1)):
+        yield grid[y+1][x]
+
+
+def a_star(start):
+    p_queue = [[start]]
+    end = grid[len(grid)-1][len(grid)-1]
+    end_stage = False
+    successes = []
+    while p_queue:
+        # iteratively add to the first value in p_queue
+        path_in_question = p_queue.pop(0)
+        # print(f"At {path_in_question[-1]} with cost {h_cost(path_in_question)}")
+        for neighbour in get_neighbour(path_in_question):
+            p_queue.append(list(path_in_question) + [neighbour])
+            if neighbour == end:
+                return path_in_question + [neighbour]
+        # if end_stage:
+        #     successes.sort(key=lambda x: (cost_path(x), len(x)))
+        #     p_queue = list(filter(lambda x: h_cost(x) < cost_path(successes[0]), p_queue))
+        p_queue.sort(key=lambda x: (-taxicab(x), h_cost(x), cost_path(x)))
+        # p_queue = list(filter(lambda x: h_cost(x)/len(x) < max_bid/len(diag_walk), p_queue))
+        if len(p_queue) % 100 == 0:
+            print(f"Sorted list, {len(p_queue)} paths, best test worth {h_cost(p_queue[0])} with {len(p_queue[0])} steps at {p_queue[0][-1].x},{p_queue[0][-1].y}, worst worth {h_cost(p_queue[-1])} {f'End Stage {cost_path(successes[0])}' if end_stage else ''}")
+    return successes
+
+
 # Attempt to create Dijstra's algorithm
 def do_dijkstra(start_loc: Node):
     p_queue = [(start_loc, 0, "START")] # implemented as a queue of lists of the form [node, loss, prev]

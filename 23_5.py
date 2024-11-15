@@ -1,4 +1,4 @@
-from multiprocessing import Pool
+from manything import Pool
 TESTING = False
 filename = "data/23_4_sample.txt" if TESTING else "data/23_4.txt"
 MARKERS = ['seed-to-soil map:', 'soil-to-fertilizer map:', 'fertilizer-to-water map:', 'water-to-light map:',

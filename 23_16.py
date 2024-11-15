@@ -1,4 +1,4 @@
-from multiprocessing import Pool
+from manything import Pool
 
 from tqdm import tqdm
 
